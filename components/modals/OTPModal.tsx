@@ -2,13 +2,11 @@
 import {
     AlertDialog,
     AlertDialogAction,
-
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-
   } from "@/components/ui/alert-dialog"
   import {
     InputOTP,
@@ -18,12 +16,15 @@ import {
 import Image from "next/image";
 import { MouseEvent, useState } from "react";
 import { Button } from "../ui/button";
+import { sendEmailToOTP, verifySecret } from "@/lib/actions/user.actions";
+import { useRouter } from "next/navigation";
   
 type ModalProps ={
     email:string;
     accountId:string;
 }
 const OTPModal = ({ email, accountId }: ModalProps) => {
+  const router =useRouter()
     const [isOpen, setIsOpen] = useState(true)
     const [password, setPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false);
@@ -31,18 +32,21 @@ const OTPModal = ({ email, accountId }: ModalProps) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-          //Call API to verify OTP
+          const sessionid = await verifySecret({accountId,password});
+          if (sessionid) {
+            router.push("/");
+          }
         } catch (error) {
             console.log(error);
         }
         setIsLoading(false);
     }
     const handleResendOTP = async()=>{
-        //call API to resend
+      await sendEmailToOTP({ email });
     }
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogContent className="shad-alert-diaglog">
+      <AlertDialogContent className="shad-alert-dialog">
         <AlertDialogHeader className="relative flex justify-center">
           <AlertDialogTitle className="h2 text-center">
             Enter your OTP
@@ -61,7 +65,7 @@ const OTPModal = ({ email, accountId }: ModalProps) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <InputOTP maxLength={6} value={password} onChange={setPassword}>
-          <InputOTPGroup>
+          <InputOTPGroup className="shad-otp">
             <InputOTPSlot index={0} className="shad-otp-slot" />
             <InputOTPSlot index={1} className="shad-otp-slot" />
             <InputOTPSlot index={2} className="shad-otp-slot" />
@@ -93,10 +97,10 @@ const OTPModal = ({ email, accountId }: ModalProps) => {
               <Button
                 type="button"
                 variant="link"
-                className="text-brand ml-1"
+                className="text-brand pl-1"
                 onClick={handleResendOTP}
               >
-                Click to resent{" "}
+                Click to resend{" "}
               </Button>
             </div>
           </div>
