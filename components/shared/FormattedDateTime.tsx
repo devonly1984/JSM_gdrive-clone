@@ -1,3 +1,5 @@
+import { cn, formatDateTime } from "@/lib/utils";
+
 const FormattedDateTime = ({
   date,
   className,
@@ -5,6 +7,10 @@ const FormattedDateTime = ({
   date: string;
   className?: string;
 }) => {
-  return <div>FormattedDateTime</div>;
+  return (
+    <div className={cn("body-1 text-light-200", className)}>
+      {formatDateTime(date)}
+    </div>
+  );
 };
 export default FormattedDateTime;

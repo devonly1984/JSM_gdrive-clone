@@ -1,13 +1,17 @@
 import FileCard from "@/components/cards/FileCard";
-import Sort from "@/components/shared/Sort";
+import Sorter from "@/components/shared/Sorter";
 import { getFiles } from "@/lib/actions/file.actions";
-import { SearchParamProps } from "@/types";
+import { getFileTypesParams } from "@/lib/utils";
+import { FileType, SearchParamProps } from "@/types";
 import { Models } from "node-appwrite";
 
-const TypePage = async ({ params }: SearchParamProps) => {
+const TypePage = async ({ params,searchParams }: SearchParamProps) => {
+  const searchText = ((await searchParams)?.query as string) || "";
+  const sort = ((await searchParams)?.sort as string) || "";
   const type = ((await params)?.type as string) || "";
+  const types = getFileTypesParams(type) as FileType[];
   let totalSize = 0;
-  const files = await getFiles();
+  const files = await getFiles({ types, searchText, sort });
   return (
     <div className="page-container">
       <section className="w-full">
@@ -19,7 +23,7 @@ const TypePage = async ({ params }: SearchParamProps) => {
 
           <div className="sort-container">
             <p className="body-1 hidden sm:block text-light-200">Sort by:</p>
-            <Sort />
+            <Sorter />
           </div>
         </div>
       </section>
