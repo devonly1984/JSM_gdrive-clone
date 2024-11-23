@@ -55,7 +55,8 @@ const [accountId, setAccountId] = useState(null)
           : await signInUser({ email: values.email });
       setAccountId(user?.accountId);
     } catch (error) {
-      setErrorMessage("Failed to create an account. Please try again");
+      setErrorMessage( "Failed to create an account. Please try again");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +119,7 @@ const [accountId, setAccountId] = useState(null)
               <Image
                 src="/assets/icons/loader.svg"
                 alt="loader"
-                className="animate-spin ml-2"
+                className="ml-2 animate-spin"
                 width={24}
                 height={24}
               />

@@ -97,7 +97,7 @@ const OTPModal = ({ email, accountId }: ModalProps) => {
               <Button
                 type="button"
                 variant="link"
-                className="text-brand pl-1"
+                className="pl-1 text-brand"
                 onClick={handleResendOTP}
               >
                 Click to resend{" "}

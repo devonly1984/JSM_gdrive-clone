@@ -1,12 +1,13 @@
 "use server";
 import {
   DeleteFileProps,
+  FileType,
   GetFilesProps,
   RenameFileProps,
   UpdateFileUsersProps,
   UploadFileProps,
 } from "@/types/index";
-import { createAdminClient } from "../appwrite";
+import { createAdminClient, createSessionClient } from "../appwrite";
 import {
   constructFileUrl,
   getFileType,
@@ -18,6 +19,7 @@ import { AppwriteConfig } from "../appwrite/config";
 import { ID, Models, Query } from "node-appwrite";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "./user.actions";
+
 
 const createQueries = (
   currentUser: Models.Document,
@@ -49,7 +51,7 @@ const createQueries = (
   
   
   return queries;
-  //TODO: Search SORT LIMITS ETC
+ 
 };
 export const uploadFile = async ({
   file,
@@ -185,3 +187,38 @@ export const deleteFile = async ({
     handleError(error, "Failed to rename File");
   }
 };
+export const getTotalSpaceUsed = async()=>{
+  try {
+  const {databases}= await createSessionClient();
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("User is not found");
+
+  const files = await databases.listDocuments(
+    AppwriteConfig.databaseId,
+    AppwriteConfig.filesCollection,
+  [Query.equal('ownerId',[currentUser])]
+
+  )
+  const totalSpace = {
+    image: { size: 0, latestDate: "" },
+    document: { size: 0, latestDate: "" },
+    video: { size: 0, latestDate: "" },
+    audio: { size: 0, latestDate: "" },
+    other: { size: 0, latestDate: "" },
+    used: 0,
+    all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+
+  }
+  files.documents.forEach(file=>{
+    const fileType = file.type as FileType;
+    totalSpace[fileType].size+=file.size;
+    totalSpace.used +=file.size;
+    if (!totalSpace[fileType].latestDate || new Date(file.$updatedAt) > new Date(totalSpace[fileType].latestDate)){
+      totalSpace[fileType].latestDate = file.$updatedAt;
+    }
+  })
+  return parseStringify(totalSpace);
+} catch(error) {
+  handleError(error, "Error calculating total space:");
+}
+}

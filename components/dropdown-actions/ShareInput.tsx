@@ -40,7 +40,7 @@ const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
                 <p className="subtitle-2">{email}</p>
                 <Button
                   onClick={() => onRemove(email)}
-                  className="share-remove-users"
+                  className="share-remove-user"
                 >
                   <Image
                     src="/assets/icons/remove.svg"
